@@ -3,10 +3,18 @@
 const BASE_URL = 'http://localhost:3000/';
 
 async function getJogos() {
-    const response = await fetch('${BASE_URL}api/jogos');
+try {
+    const response = await fetch ('${BASE_URL}jogos');
+    if{!response.ok}  {
+        throw new Error ('HTTP error! status: $(response.statusText)');
+    }
     const data = await response.json();
     return data;
-    
+
+} catch (error) {
+    console.error{'Erro ao buscar jogos:', error};
+    alert('Erro ao buscar jogos. Por favor, tente novamente mais tarde')
+    return [];
 }
 
 // Retorna todos os times
