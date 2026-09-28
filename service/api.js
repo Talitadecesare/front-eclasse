@@ -1,7 +1,8 @@
 // BASE_URL aponta para o JSON local enquanto a API não está integrada.
 // Quando a API estiver pronta, basta trocar para: 'http://localhost:3000/api'
-const BASE_URL = 'http://localhost:3000/';
+const BASE_URL = 'http://localhost:3000/api/';
 
+//Função interna
 async function _get(endpoint) {
     try {
     const response = await fetch(`${BASE_URL}${endpoint}`);
@@ -11,29 +12,28 @@ async function _get(endpoint) {
     const data = await response.json();
     return data;
 } catch (error) {
-    console.error(`Erro ao buscar jogos ${endpoint}:`, error);
-    return [];
+    console.error(`Erro ao buscar os ${endpoint}:`, error);
+    return rotas[endpoint] ?? [];
 }
     
 }
 
-// Retorna todos os times
+// GET JOGOS
+async function getJogos() {
+    return _get('/jogos');
+}
+
+// GET TIMES
 async function getTimes() {
-    const response = await fetch(`${BASE_URL}times`);
-    const data = await response.json();
-    return data;
+    return _get('/times');
 }
 
-// Retorna todos os competidores
+// GET COMPETIDORES
 async function getCompetidores() {
-    const response = await fetch(`${BASE_URL}competidores`);
-    const data = await response.json();
-    return data;
+    return _get('/competidores');
 }
 
-// Retorna todos os confrontos
+// GET CONFRONTOS
 async function getConfrontos() {
-    const response = await fetch(`${BASE_URL}confrontos`);
-    const data = await response.json();
-    return data;
+    return _get('/confrontos');
 }
