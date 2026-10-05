@@ -1,91 +1,113 @@
-// BASE_URL aponta para a API (Express + Supabase).
-const BASE_URL = 'http://localhost:3000/api';
+// BASE_URL aponta para a API unificada rodando localmente
+const BASE_URL = 'http://localhost:3000/api/';
 
-//Função interna GET
-async function _get(endpoint) {
+// Função genérica auxiliar para requisições GET
+async function getData(endpoint) {
     try {
         const response = await fetch(`${BASE_URL}${endpoint}`);
         if (!response.ok) {
-            throw new Error(`Erro ao buscar os ${endpoint}: ${response.status}`);
+            throw new Error(`Erro na requisição: ${response.statusText}`);
         }
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error(`Erro ao buscar os ${endpoint}:`, error);
-        return [];
+        alert(`Tivemos problemas para buscar dados. ERRO: ${error.message}`);
     }
 }
 
-//Função interna POST
-async function _post(endpoint, dados) {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados),
-    });
-    if (!response.ok) {
-        const erro = await response.json().catch(() => ({}));
-        throw new Error(erro.erro || `Erro ao criar em ${endpoint}: ${response.status}`);
-    }
-    return await response.json();
-}
+// Função genérica auxiliar para enviar dados (POST, PUT, DELETE)
+async function sendData(endpoint, method, body = null) {
+    try {
+        const config = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
 
-//Função interna PUT
-async function _put(endpoint, dados) {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados),
-    });
-    if (!response.ok) {
-        const erro = await response.json().catch(() => ({}));
-        throw new Error(erro.erro || `Erro ao atualizar em ${endpoint}: ${response.status}`);
-    }
-    return await response.json();
-}
+        if (body) {
+            config.body = JSON.stringify(body);
+        }
 
-//Função interna DELETE
-async function _delete(endpoint) {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        method: 'DELETE',
-    });
-    if (!response.ok) {
-        const erro = await response.json().catch(() => ({}));
-        throw new Error(erro.erro || `Erro ao excluir em ${endpoint}: ${response.status}`);
+        const response = await fetch(`${BASE_URL}${endpoint}`, config);
+
+        if (!response.ok) {
+            throw new Error(`Erro na operação ${method}: ${response.statusText}`);
+        }
+
+        // Se a resposta for 204 No Content (comum em DELETE), não tenta ler o JSON
+        if (response.status === 204) {
+            return true;
+        }
+
+        return await response.json();
+    } catch (error) {
+        alert(`Tivemos problemas para salvar/remover os dados. ERRO: ${error.message}`);
     }
 }
 
-// GET JOGOS
 async function getJogos() {
-    return _get('/jogos');
+    return getData('jogos');
 }
 
-// GET TIMES
 async function getTimes() {
-    return _get('/times');
+    return getData('times');
 }
 
-// GET COMPETIDORES
 async function getCompetidores() {
-    return _get('/competidores');
+    return getData('competidores');
 }
 
-// GET CONFRONTOS
 async function getConfrontos() {
-    return _get('/confrontos');
+    return getData('confrontos');
 }
 
-// POST (colecao: 'jogos' | 'times' | 'competidores' | 'confrontos')
-async function criarItem(colecao, dados) {
-    return _post(`/${colecao}`, dados);
+async function criarJogo(jogo) {
+    // Exemplo de objeto recebido: { name: "Valorant", genre: "FPS" }
+    return sendData('jogos', 'POST', jogo);
 }
 
-// PUT
-async function atualizarItem(colecao, id, dados) {
-    return _put(`/${colecao}/${id}`, dados);
+async function criarTime(time) {
+    // Exemplo de objeto recebido: { name: "FURIA", tag: "FUR" }
+    return sendData('times', 'POST', time);
 }
 
-// DELETE
-async function deletarItem(colecao, id) {
-    return _delete(`/${colecao}/${id}`);
+async function criarCompetidor(competidor) {
+    // Exemplo de objeto recebido: { nickname: "Fallen", name: "Gabriel Toledo", team_id: 1 }
+    return sendData('competidores', 'POST', competidor);
+}
+
+async function criarConfronto(confronto) {
+    return sendData('confrontos', 'POST', confronto);
+}
+
+async function atualizarJogo(id, jogo) {
+    return sendData(`jogos/${id}`, 'PUT', jogo);
+}
+
+async function atualizarTime(id, time) {
+    return sendData(`times/${id}`, 'PUT', time);
+}
+
+async function atualizarCompetidor(id, competidor) {
+    return sendData(`competidores/${id}`, 'PUT', competidor);
+}
+
+async function atualizarConfronto(id, confronto) {
+    return sendData(`confrontos/${id}`, 'PUT', confronto);
+}
+
+async function deletarJogo(id) {
+    return sendData(`jogos/${id}`, 'DELETE');
+}
+
+async function deletarTime(id) {
+    return sendData(`times/${id}`, 'DELETE');
+}
+
+async function deletarCompetidor(id) {
+    return sendData(`competidores/${id}`, 'DELETE');
+}
+
+async function deletarConfronto(id) {
+    return sendData(`confrontos/${id}`, 'DELETE');
 }
